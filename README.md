@@ -5,7 +5,7 @@ A gentle but thorough introduction to Combine. 😁
 
 ## What is Combine?
 
-Combine is a new **reactive** framework created by Apple that streamlines how you can process asynchronous and synchronous operations.
+Combine is a new **reactive** framework created by Apple that streamlines how you can process asynchronous operations.
 
 Combine code is **declarative** and succinct, making it easy to write and read once you have a basic understanding of it.
 
