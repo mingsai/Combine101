@@ -483,9 +483,9 @@ There is also a new framework for developing user interfaces called SwiftUI that
 
 Check out this book that I am a co-author and the technical editor for:
 
-[Combine: Asynchronous Programming with Swift](https://store.raywenderlich.com/products/combine-asynchronous-programming-with-swift)
+[Combine: Asynchronous Programming with Swift](https://store.raywenderlich.com/a/742/link/27)
 
-<a href="https://store.raywenderlich.com/products/combine-asynchronous-programming-with-swift" alt="Combine: Asynchronous Programming with Swift"><img src="https://github.com/learncombine/Combine101/blob/master/images/combineBook.png"></a>
+<a href="https://store.raywenderlich.com/a/742/link/27" alt="Combine: Asynchronous Programming with Swift"><img src="https://github.com/learncombine/Combine101/blob/master/images/combineBook.png"></a>
 
 It's packed with coverage of Combine concepts, hands-on exercises in playgrounds, and complete iOS app projects. Everything you need to _transform yourself_ from novice to expert with Combine — and have fun while doing it!
 
