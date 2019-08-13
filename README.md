@@ -129,7 +129,7 @@ The _publisher_ calls this method on the subscriber to give it the subscription 
 ```swift
 func receive(_ input: Self.Input) -> Subscribers.Demand
 ```
-The _publisher_ calls this method on the subscriber to send a new value to the subscriber.
+The _publisher_ calls this method on the subscriber to send a new value to the subscriber. Notice that the return value is `Subscribers.Demand`. See the **Handling backpressure** section for more info.
 
 ### The publisher tells the subscriber when it's done or has failed
 ```swift
@@ -259,6 +259,16 @@ This will print:
 finished
 ```
 
+### Handling backpressure
+
+Backpressure is the pressure caused by the stream of values being sent by a publisher to a subscriber. If a publisher sends too many values to a subscriber, this can cause problems. In order to manage that backpressure, every time a subscriber receives a new value, it must tell the publisher what its willingness is to receive additional values, i.e., its **demand**. Demand can only be adjusted additively. In other words, a subscriber can _increase_ its demand every time it receives a new value, but it cannot _decrease_ it. There are three levels of demand that a subscriber can return from `receive(_:) -> Subscribers.Demand`:
+
+- `.none`
+- `.max(value: Int)`
+- `.unlimited`
+
+The `sink` and `assign(to:on:)` operators both automatically return `.unlimited` for demand. You can define custom subscribers to return a different demand, however this goes beyond the scope of this introduction.
+
 ## What are operators?
 
 **Operators are special methods that return a publisher**.
@@ -277,6 +287,130 @@ The `map` category of operators provide several ways that you can transform valu
 #### Use `filter` operators to limit which values get through
 
 The `filter` family of operators provide several ways that you can prevent or limit values received from an upstream publisher that are sent downstream.
+
+### How to share a publisher
+
+To understand _why_ you would want to share a subscription, review this example where two subscribers subscribe to the same publisher.
+
+```swift
+let subject = PassthroughSubject<Int, Never>()
+
+let publisher = subject
+    .handleEvents(receiveOutput: { print("Handling", $0) })
+
+_ = publisher
+    .sink(receiveValue: { print("1st subscriber", $0) })
+
+_ = publisher
+    .sink(receiveValue: { print("2nd subscriber", $0) })
+
+subject.send(0)
+subject.send(1)
+```
+
+This will print:
+
+```none
+Handling 0
+1st subscriber 0
+Handling 0
+2nd subscriber 0
+Handling 1
+1st subscriber 1
+Handling 1
+2nd subscriber 1
+```
+
+The `handleEvents` operator includes closures to handle each event in the publisher's lifecycle:
+
+- `receiveSubscription`
+- `receiveRequest`
+- `receiveOutput`
+- `receiveCompletion`
+- `receiveCancel`
+
+Each subscriber independently subscribes and handles the values sent by the publisher. In order to be more efficient, you can use the `share()` operator to share the publisher to multiple subscribers.
+
+```swift
+let publisher = subject
+    .handleEvents(receiveOutput: { print("Handling", $0) })
+    .share()
+```
+
+This will now print:
+
+```none
+Handling 0
+1st subscriber 0
+2nd subscriber 0
+Handling 1
+1st subscriber 1
+2nd subscriber 1
+```
+
+There is one caveat with `share()`: it will only share values to _existing_ subscribers.
+
+If you add the following code to the end of the previous example:
+
+```swift
+_ = publisher
+  .sink(receiveValue: { print("3rd subscriber", $0) })
+
+subject.send(2)
+```
+
+The complete example will now print:
+
+```none
+Handling 0
+1st subscriber 0
+2nd subscriber 0
+Handling 1
+1st subscriber 1
+2nd subscriber 1
+Handling 2
+1st subscriber 2
+2nd subscriber 2
+3rd subscriber 2
+```
+
+The 3rd subscriber does not get the `1` and `2` because it was not yet subscribed.
+
+### How to see every event that occurs
+
+One very useful operator to use when debugging Combine code is the `print()` operator. You can insert it anywhere in a publisher or subscription chain of operators.
+
+```swift
+let subject = PassthroughSubject<Int, Never>()
+
+let publisher = subject
+    .print("Publisher")
+    .share()
+
+_ = publisher
+    .print("Subscriber")
+    .sink(receiveValue: { print($0) })
+
+subject.send(0)
+subject.send(1)
+```
+
+This will print:
+
+```none
+Subscriber: receive subscription: (Multicast)
+Subscriber: request unlimited
+Publisher: receive subscription: (PassthroughSubject)
+Publisher: request unlimited
+Publisher: receive value: (0)
+Subscriber: receive value: (0)
+0
+Publisher: receive value: (1)
+Subscriber: receive value: (1)
+1
+Subscriber: receive cancel
+Publisher: receive cancel
+```
 
 ### What other kinds of operators are there?
 
