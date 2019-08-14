@@ -489,4 +489,6 @@ Check out this book that I am a co-author and the technical editor for:
 
 It's packed with coverage of Combine concepts, hands-on exercises in playgrounds, and complete iOS app projects. Everything you need to _transform yourself_ from novice to expert with Combine — and have fun while doing it!
 
+I also started a new [HackingCombine](https://github.com/learncombine/HackingCombine) repo where I explore uncharted territory in Combine.
+
 Combine and SwiftUI are Copyright © 2019 Apple Inc.
